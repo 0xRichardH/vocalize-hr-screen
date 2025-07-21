@@ -1,0 +1,4 @@
+- AssemblyAI (STT): https://www.assemblyai.com/dashboard/signup
+- Cartesia (TTS): https://play.cartesia.ai/sign-up
+- LiveKit Cloud: https://cloud.livekit.io/
+- LiveKit Agents Playground: https://agents-playground.livekit.io/
