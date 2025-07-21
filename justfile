@@ -5,4 +5,4 @@ uv *ARG:
   uv {{ARG}}
 
 run:
-  uv run hello.py
+  uv run voice_agent.py dev
