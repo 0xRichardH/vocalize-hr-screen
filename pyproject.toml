@@ -6,7 +6,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "assemblyai[extras]>=0.42.0",
+    "google-genai>=1.26.0",
+    "langchain-google-genai>=2.1.8",
+    "langgraph>=0.5.4",
     "livekit-agents[assemblyai,cartesia,silero]>=1.2.1",
     "livekit-plugins-google>=1.2.1",
+    "livekit-plugins-langchain>=1.2.1",
     "livekit-plugins-noise-cancellation>=0.2.5",
 ]
