@@ -16,6 +16,10 @@ class Configuration(BaseModel):
         default="google_genai:gemini-2.5-flash-lite",
         description="The name of the language model to use for the guardrails.",
     )
+    web_search_model: str = Field(
+        default="gemini-2.0-flash",
+        description="The name of the language model to use for web search.",
+    )
 
     @classmethod
     def from_runnable_config(

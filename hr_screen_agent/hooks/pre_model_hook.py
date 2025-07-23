@@ -29,7 +29,7 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> C
     jailbreak_result = await jailbreak_guardrail(llm, last_messages)
     if not jailbreak_result.is_safe:
         return Command(
-            graph=Command.PARENT,
+            graph=None,
             goto=END,
             update={"messages": [AIMessage(content=jailbreak_result.reasoning)]},
         )
@@ -38,7 +38,7 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> C
     relevance_result = await relevance_guardrail(llm, last_messages)
     if not relevance_result.is_relevant:
         return Command(
-            graph=Command.PARENT,
+            graph=None,
             goto=END,
             update={"messages": [AIMessage(content=relevance_result.reasoning)]},
         )
