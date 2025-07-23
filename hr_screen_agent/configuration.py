@@ -9,8 +9,16 @@ class Configuration(BaseModel):
     """The configuration for the agent."""
 
     chat_model: str = Field(
-        default="gemini-2.5-flash-lite",
+        default="google_genai:gemini-2.5-flash",
         description="The name of the language model to use for the agent's query generation.",
+    )
+    guardrail_model: str = Field(
+        default="google_genai:gemini-2.5-flash-lite",
+        description="The name of the language model to use for the guardrails.",
+    )
+    web_search_model: str = Field(
+        default="gemini-2.0-flash",
+        description="The name of the language model to use for web search.",
     )
 
     @classmethod

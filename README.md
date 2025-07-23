@@ -5,5 +5,11 @@
 
 ## TODO
 
-- [ ] Add Guardrails check
-- [ ] Fix the Iinitialization of the Agent /
+- [x] Add Guardrails check
+- [x] Create a new Agent - hr_screen_agent
+- [ ] Add Timer Tool
+- [ ] Add Summary Tool (write to a markdown file)
+- [ ] Add a Tool to get the JD (job description)
+- [ ] Add a Tool to get the CV (curriculum vitae) (Optional)
+- [ ] Add a Tool to get the Resume
+- [ ] Add a Tool to get the Interview Questions (Optional)
