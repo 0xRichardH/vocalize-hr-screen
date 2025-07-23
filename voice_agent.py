@@ -32,7 +32,7 @@ async def entrypoint(ctx: agents.JobContext):
         room=ctx.room,
         agent=Agent(
             llm=langchain.LLMAdapter(agent),
-            instructions="You are a helpful HR screening assistant. Keep your responses concise and conversational.",
+            instructions="",
         ),
         room_input_options=RoomInputOptions(
             noise_cancellation=noise_cancellation.BVC(),
@@ -41,7 +41,9 @@ async def entrypoint(ctx: agents.JobContext):
 
     # Greet the user when they join
     await session.generate_reply(
-        instructions="Greet the user and offer your assistance."
+        user_input="Hi",
+        instructions="Greet the user and offer your assistance.",
+        allow_interruptions=True,
     )
 
 

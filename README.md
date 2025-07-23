@@ -2,3 +2,8 @@
 - Cartesia (TTS): https://play.cartesia.ai/sign-up
 - LiveKit Cloud: https://cloud.livekit.io/
 - LiveKit Agents Playground: https://agents-playground.livekit.io/
+
+## TODO
+
+- [ ] Add Guardrails check
+- [ ] Fix the Iinitialization of the Agent /

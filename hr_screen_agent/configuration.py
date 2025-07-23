@@ -9,7 +9,7 @@ class Configuration(BaseModel):
     """The configuration for the agent."""
 
     chat_model: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-2.5-flash-lite",
         description="The name of the language model to use for the agent's query generation.",
     )
 
