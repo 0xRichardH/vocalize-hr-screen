@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "assemblyai[extras]>=0.42.0",
     "google-genai>=1.26.0",
+    "langchain>=0.3.26",
     "langchain-google-genai>=2.1.8",
     "langgraph>=0.5.4",
     "livekit-agents[assemblyai,cartesia,silero]>=1.2.1",
