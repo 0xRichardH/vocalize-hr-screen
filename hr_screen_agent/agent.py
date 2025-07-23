@@ -27,6 +27,7 @@ def create_hr_screen_agent(debug: bool = False) -> PregelProtocol:
         prompt=agent_instructions.format(
             current_time_context=current_time_context(),
             think_tool_instructions=think_tool_instructions,
+            company_name="Tech Innovators Inc.",
             job_role="Software Engineer",
         ),
         debug=debug,
