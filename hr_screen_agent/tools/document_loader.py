@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Annotated, List, Optional
+from typing import Annotated, List
 
 from langchain_core.messages import ToolMessage
 from langchain_core.tools import InjectedToolCallId, tool
@@ -52,222 +52,90 @@ def _read_pdf_file(file_path: Path) -> str:
         return f"Error reading PDF file: {str(e)}"
 
 
-def _read_markdown_file(file_path: Path) -> str:
-    """Helper function to read markdown files."""
+def _read_text_file(file_path: Path) -> str:
+    """Helper function to read text/markdown files."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except Exception as e:
-        return f"Error reading markdown file: {str(e)}"
+        return f"Error reading text file: {str(e)}"
 
 
-def _normalize_name(name: str) -> str:
-    """Normalize a name for file matching by removing spaces, converting to lowercase."""
-    return name.lower().replace(" ", "_").replace("-", "_")
-
-
-def _create_job_patterns(job_role: Optional[str] = None, company_name: Optional[str] = None) -> List[str]:
-    """Create file patterns for job descriptions based on job role and company name."""
-    patterns = []
+@tool(
+    "list_input_files",
+    description="List all files in the input folder. Shows filename, file type, and size to help choose which files to read.",
+)
+def list_input_files(
+    tool_call_id: Annotated[str, InjectedToolCallId],
+) -> Command:
+    """List all files in the input folder.
     
-    # Base patterns (original functionality)
-    base_patterns = [
-        "jd.md",
-        "job_description.md", 
-        "job-description.md",
-        "jobdescription.md",
-        "JD.md",
-        "Job_Description.md",
-        "Job-Description.md",
-        "JobDescription.md"
-    ]
-    patterns.extend(base_patterns)
+    This tool shows all available files in the input directory with their types and sizes,
+    allowing you to see what documents are available before deciding which ones to read.
     
-    # Add specific patterns based on parameters
-    if job_role:
-        normalized_role = _normalize_name(job_role)
-        role_patterns = [
-            f"{normalized_role}.md",
-            f"{normalized_role}_jd.md",
-            f"{normalized_role}-jd.md",
-            f"jd_{normalized_role}.md",
-            f"jd-{normalized_role}.md",
-            f"job_description_{normalized_role}.md",
-            f"job-description-{normalized_role}.md",
-        ]
-        patterns.extend(role_patterns)
+    Returns:
+        A formatted list of all files in the input folder with their details.
+    """
     
-    if company_name:
-        normalized_company = _normalize_name(company_name)
-        company_patterns = [
-            f"{normalized_company}_jd.md",
-            f"{normalized_company}-jd.md",
-            f"jd_{normalized_company}.md",
-            f"jd-{normalized_company}.md",
-        ]
-        patterns.extend(company_patterns)
-    
-    if job_role and company_name:
-        normalized_role = _normalize_name(job_role)
-        normalized_company = _normalize_name(company_name)
-        combined_patterns = [
-            f"{normalized_company}_{normalized_role}.md",
-            f"{normalized_company}-{normalized_role}.md",
-            f"{normalized_role}_{normalized_company}.md",
-            f"{normalized_role}-{normalized_company}.md",
-            f"{normalized_company}_{normalized_role}_jd.md",
-            f"{normalized_company}-{normalized_role}-jd.md",
-        ]
-        patterns.extend(combined_patterns)
-    
-    return patterns
-
-
-def _create_candidate_patterns(candidate_name: Optional[str] = None, file_type: str = "resume") -> List[str]:
-    """Create file patterns for CV/resume based on candidate name."""
-    patterns = []
-    
-    # Base patterns (original functionality)
-    if file_type == "cv":
-        base_patterns = [
-            "cv.pdf",
-            "curriculum_vitae.pdf",
-            "curriculum-vitae.pdf",
-            "curriculumvitae.pdf",
-            "CV.pdf",
-            "Curriculum_Vitae.pdf",
-            "Curriculum-Vitae.pdf",
-            "CurriculumVitae.pdf"
-        ]
-    else:  # resume
-        base_patterns = [
-            "resume.pdf",
-            "resume_*.pdf",
-            "resume-*.pdf",
-            "Resume.pdf",
-            "Resume_*.pdf",
-            "Resume-*.pdf",
-            "RESUME.pdf"
-        ]
-    patterns.extend(base_patterns)
-    
-    # Add specific patterns based on candidate name
-    if candidate_name:
-        normalized_name = _normalize_name(candidate_name)
-        name_patterns = [
-            f"{normalized_name}.pdf",
-            f"{normalized_name}_{file_type}.pdf",
-            f"{normalized_name}-{file_type}.pdf",
-            f"{file_type}_{normalized_name}.pdf",
-            f"{file_type}-{normalized_name}.pdf",
-        ]
-        patterns.extend(name_patterns)
-        
-        # Also try with original case and spaces replaced by underscores/hyphens
-        original_underscore = candidate_name.replace(" ", "_")
-        original_hyphen = candidate_name.replace(" ", "-")
-        if original_underscore != normalized_name:
-            patterns.extend([
-                f"{original_underscore}.pdf",
-                f"{original_underscore}_{file_type}.pdf",
-                f"{original_underscore}-{file_type}.pdf",
-            ])
-        if original_hyphen != normalized_name:
-            patterns.extend([
-                f"{original_hyphen}.pdf",
-                f"{original_hyphen}_{file_type}.pdf",
-                f"{original_hyphen}-{file_type}.pdf",
-            ])
-    
-    return patterns
-
-
-def _read_document_files(folder_path: str, file_patterns: List[str], file_type: str = "text") -> str:
-    """Helper function to read document files from a folder based on patterns."""
-    input_dir = Path(folder_path)
+    input_dir = Path("input")
     
     if not input_dir.exists():
-        return f"Input folder '{folder_path}' does not exist. Please create it and add the required documents."
+        content = "Input folder does not exist. Please create it and add documents."
+        return Command(
+            update={
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+            }
+        )
     
-    files_found = []
-    content_parts = []
+    files = list(input_dir.glob("*"))
     
-    # Look for files matching the patterns
-    for pattern in file_patterns:
-        matching_files = list(input_dir.glob(pattern))
-        files_found.extend(matching_files)
+    if not files:
+        content = "Input folder is empty. Please add documents to the input folder."
+        return Command(
+            update={
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+            }
+        )
     
-    # Remove duplicates while preserving order
-    seen = set()
-    unique_files = []
-    for file_path in files_found:
-        if file_path not in seen:
-            seen.add(file_path)
-            unique_files.append(file_path)
+    # Filter out directories and sort files
+    files = [f for f in files if f.is_file()]
+    files.sort()
     
-    if not unique_files:
-        return f"No files found matching patterns {file_patterns[:5]}{'...' if len(file_patterns) > 5 else ''} in '{folder_path}'. Please add the required documents."
+    if not files:
+        content = "No files found in input folder (only directories present)."
+        return Command(
+            update={
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+            }
+        )
     
-    # Read content from all matching files
-    for file_path in unique_files:
-        try:
-            if file_type == "pdf":
-                content = _read_pdf_file(file_path)
-            elif file_type == "markdown":
-                content = _read_markdown_file(file_path)
-            else:
-                # Default text reading
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read().strip()
-            
-            if content:
-                content_parts.append(f"=== {file_path.name} ===\n{content}")
-        except Exception as e:
-            content_parts.append(f"=== {file_path.name} ===\nError reading file: {str(e)}")
+    # Format file list
+    file_list = ["Available files in input folder:\n"]
     
-    if not content_parts:
-        return f"Found {len(unique_files)} file(s) but all were empty or unreadable."
+    for file_path in files:
+        # Get file size
+        size_bytes = file_path.stat().st_size
+        if size_bytes < 1024:
+            size_str = f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            size_str = f"{size_bytes / 1024:.1f} KB"
+        else:
+            size_str = f"{size_bytes / (1024 * 1024):.1f} MB"
+        
+        # Get file type
+        suffix = file_path.suffix.lower()
+        if suffix == '.pdf':
+            file_type = "PDF"
+        elif suffix in ['.md', '.markdown']:
+            file_type = "Markdown"
+        elif suffix in ['.txt', '.text']:
+            file_type = "Text"
+        else:
+            file_type = f"{suffix[1:].upper() if suffix else 'Unknown'}"
+        
+        file_list.append(f"• {file_path.name} ({file_type}, {size_str})")
     
-    return "\n\n".join(content_parts)
-
-
-@tool(
-    "get_job_description",
-    description="Load and retrieve the job description (JD) from the input folder. Expects markdown (.md) files. Can search by job role and/or company name for more targeted results.",
-)
-def get_job_description(
-    job_role: Annotated[Optional[str], "The job role/position title to search for (e.g., 'Senior Software Engineer', 'Data Scientist'). Optional."] = None,
-    company_name: Annotated[Optional[str], "The company name to search for (e.g., 'Tech Innovators Inc', 'Google'). Optional."] = None,
-    tool_call_id: Annotated[str, InjectedToolCallId] = None,
-) -> Command:
-    """Load and retrieve the job description from the input folder.
-    
-    This tool searches for job description files in the 'input' folder using common naming patterns
-    for markdown files. It can search generically or target specific job roles and companies.
-    
-    Args:
-        job_role: Optional job role/position title to search for more targeted results
-        company_name: Optional company name to search for more targeted results
-    
-    Returns:
-        The content of the job description markdown file(s) found in the input folder.
-    """
-    
-    # Create patterns based on provided parameters
-    jd_patterns = _create_job_patterns(job_role, company_name)
-    
-    content = _read_document_files("input", jd_patterns, "markdown")
-    
-    # Add context about the search parameters
-    search_info = []
-    if job_role:
-        search_info.append(f"Job Role: {job_role}")
-    if company_name:
-        search_info.append(f"Company: {company_name}")
-    
-    if search_info:
-        search_context = f"Search Parameters - {', '.join(search_info)}\n\n"
-        content = search_context + content
+    content = "\n".join(file_list)
     
     return Command(
         update={
@@ -277,73 +145,76 @@ def get_job_description(
 
 
 @tool(
-    "get_cv",
-    description="Load and retrieve the CV (Curriculum Vitae) from the input folder. This is optional. Expects PDF files. Can search by candidate name for more targeted results.",
+    "read_input_file",
+    description="Read the content of a specific file from the input folder. Supports PDF, Markdown (.md), and Text (.txt) files.",
 )
-def get_cv(
-    candidate_name: Annotated[Optional[str], "The candidate's name to search for (e.g., 'John Smith', 'Jane Doe'). Optional."] = None,
-    tool_call_id: Annotated[str, InjectedToolCallId] = None,
+def read_input_file(
+    filename: Annotated[str, "The name of the file to read (e.g., 'resume.pdf', 'jd.md', 'notes.txt')"],
+    tool_call_id: Annotated[str, InjectedToolCallId],
 ) -> Command:
-    """Load and retrieve the CV (Curriculum Vitae) from the input folder.
+    """Read the content of a specific file from the input folder.
     
-    This tool searches for CV files in the 'input' folder using common naming patterns
-    for PDF files. It can search generically or target a specific candidate's CV.
-    
-    This tool is optional and may not find any files if CVs are not provided.
+    This tool can read various file formats:
+    - PDF files (.pdf) - Extracts text content from PDF documents
+    - Markdown files (.md, .markdown) - Reads markdown content
+    - Text files (.txt, .text) - Reads plain text content
     
     Args:
-        candidate_name: Optional candidate name to search for more targeted results
+        filename: The name of the file to read from the input folder
     
     Returns:
-        The content of the CV PDF file(s) found in the input folder, or a message if none found.
+        The content of the specified file.
     """
     
-    # Create patterns based on candidate name
-    cv_patterns = _create_candidate_patterns(candidate_name, "cv")
+    input_dir = Path("input")
+    file_path = input_dir / filename
     
-    content = _read_document_files("input", cv_patterns, "pdf")
+    # Check if input folder exists
+    if not input_dir.exists():
+        content = "Input folder does not exist. Please create it and add documents."
+        return Command(
+            update={
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+            }
+        )
     
-    # Add context about the search parameters
-    if candidate_name:
-        search_context = f"Search Parameters - Candidate: {candidate_name}\n\n"
-        content = search_context + content
+    # Check if file exists
+    if not file_path.exists():
+        content = f"File '{filename}' not found in input folder. Use list_input_files to see available files."
+        return Command(
+            update={
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+            }
+        )
     
-    return Command(
-        update={
-            "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
-        }
-    )
-
-
-@tool(
-    "get_resume",
-    description="Load and retrieve the Resume from the input folder. Expects PDF files. Can search by candidate name for more targeted results.",
-)
-def get_resume(
-    candidate_name: Annotated[Optional[str], "The candidate's name to search for (e.g., 'John Smith', 'Jane Doe'). Optional."] = None,
-    tool_call_id: Annotated[str, InjectedToolCallId] = None,
-) -> Command:
-    """Load and retrieve the Resume from the input folder.
+    # Check if it's actually a file (not a directory)
+    if not file_path.is_file():
+        content = f"'{filename}' is not a file. Use list_input_files to see available files."
+        return Command(
+            update={
+                "messages": [ToolMessage(content, tool_call_id=tool_call_id)],
+            }
+        )
     
-    This tool searches for resume files in the 'input' folder using common naming patterns
-    for PDF files. It can search generically or target a specific candidate's resume.
+    # Determine file type and read accordingly
+    suffix = file_path.suffix.lower()
     
-    Args:
-        candidate_name: Optional candidate name to search for more targeted results
+    if suffix == '.pdf':
+        file_content = _read_pdf_file(file_path)
+        file_type = "PDF"
+    elif suffix in ['.md', '.markdown']:
+        file_content = _read_text_file(file_path)
+        file_type = "Markdown"
+    elif suffix in ['.txt', '.text']:
+        file_content = _read_text_file(file_path)
+        file_type = "Text"
+    else:
+        # Try to read as text file for other extensions
+        file_content = _read_text_file(file_path)
+        file_type = f"{suffix[1:].upper() if suffix else 'Unknown'}"
     
-    Returns:
-        The content of the resume PDF file(s) found in the input folder.
-    """
-    
-    # Create patterns based on candidate name
-    resume_patterns = _create_candidate_patterns(candidate_name, "resume")
-    
-    content = _read_document_files("input", resume_patterns, "pdf")
-    
-    # Add context about the search parameters
-    if candidate_name:
-        search_context = f"Search Parameters - Candidate: {candidate_name}\n\n"
-        content = search_context + content
+    # Format the response
+    content = f"=== {filename} ({file_type}) ===\n{file_content}"
     
     return Command(
         update={
