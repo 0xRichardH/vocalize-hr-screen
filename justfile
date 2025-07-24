@@ -4,5 +4,5 @@ set dotenv-path := ".env"
 uv *ARG:
   uv {{ARG}}
 
-run:
+dev:
   uv run voice_agent.py dev
