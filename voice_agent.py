@@ -40,6 +40,7 @@ async def entrypoint(ctx: agents.JobContext):
             model="sonic-2",
             voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",  # Katie
             language="en",
+            speed="normal",
         ),
         vad=silero.VAD.load(),  # Voice Activity Detection for interruptions
         turn_detection="stt",  # Use AssemblyAI's STT-based turn detection
