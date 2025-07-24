@@ -28,7 +28,7 @@ def create_hr_screen_agent(
     configurable = Configuration.from_runnable_config()
     llm = init_chat_model(
         model=configurable.chat_model,
-        temperature=1.0,
+        temperature=0.5,
         max_retries=3,
     )
 
