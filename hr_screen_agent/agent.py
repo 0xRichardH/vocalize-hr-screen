@@ -47,9 +47,10 @@ def create_hr_screen_agent(debug: bool = False) -> PregelProtocol:
         prompt=agent_instructions.format(
             current_time_context=current_time_context(),
             think_tool_instructions=think_tool_instructions,
-            candidate_name="Jane Doe",
-            company_name="Tech Innovators Inc.",
-            job_role="Software Engineer",
+            candidate_name=configurable.candidate_name,
+            company_name=configurable.company_name,
+            job_role=configurable.job_role,
+            interview_duration_minutes=configurable.interview_duration_minutes,
         ),
         debug=debug,
     )

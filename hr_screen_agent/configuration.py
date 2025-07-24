@@ -28,6 +28,15 @@ class Configuration(BaseModel):
         default=5,
         description="Number of minutes before end to show warning.",
     )
+    candidate_name: str = Field(
+        ..., description="The name of the candidate being interviewed."
+    )
+    company_name: str = Field(
+        ..., description="The name of the company conducting the interview."
+    )
+    job_role: str = Field(
+        ..., description="The job role for which the candidate is being interviewed."
+    )
 
     @classmethod
     def from_runnable_config(
