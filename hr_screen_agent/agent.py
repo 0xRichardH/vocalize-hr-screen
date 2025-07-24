@@ -1,6 +1,8 @@
 from langchain.chat_models import init_chat_model
 from langgraph.prebuilt.chat_agent_executor import create_react_agent
 from langgraph.pregel.protocol import PregelProtocol
+from langgraph.types import Checkpointer
+from livekit.plugins.cartesia.tts import Optional
 
 from hr_screen_agent.configuration import Configuration
 from hr_screen_agent.hooks.pre_model_hook import pre_model_hook
@@ -20,7 +22,9 @@ from hr_screen_agent.tools import (
 from hr_screen_agent.utils import current_time_context
 
 
-def create_hr_screen_agent(debug: bool = False) -> PregelProtocol:
+def create_hr_screen_agent(
+    checkpointer: Optional[Checkpointer] = None, debug: bool = False
+) -> PregelProtocol:
     configurable = Configuration.from_runnable_config()
     llm = init_chat_model(
         model=configurable.chat_model,
@@ -52,6 +56,7 @@ def create_hr_screen_agent(debug: bool = False) -> PregelProtocol:
             job_role=configurable.job_role,
             interview_duration_minutes=configurable.interview_duration_minutes,
         ),
+        checkpointer=checkpointer,
         debug=debug,
     )
 

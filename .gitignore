@@ -5,3 +5,4 @@
 KMS
 __pycache__/
 output
+*.db
