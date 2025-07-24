@@ -7,10 +7,12 @@ from hr_screen_agent.hooks.pre_model_hook import pre_model_hook
 from hr_screen_agent.prompts import agent_instructions, think_tool_instructions
 from hr_screen_agent.state import HrScreenAgentState
 from hr_screen_agent.tools import (
+    check_time_remaining,
     clear_thoughts,
     get_interview_summary,
     list_input_files,
     read_input_file,
+    start_timer,
     think,
     web_search,
     write_interview_summary,
@@ -39,6 +41,8 @@ def create_hr_screen_agent(debug: bool = False) -> PregelProtocol:
             read_input_file,
             write_interview_summary,
             get_interview_summary,
+            start_timer,
+            check_time_remaining,
         ],
         prompt=agent_instructions.format(
             current_time_context=current_time_context(),
@@ -54,17 +58,19 @@ def create_hr_screen_agent(debug: bool = False) -> PregelProtocol:
 # just uv run -m hr_screen_agent.agent
 if __name__ == "__main__":
     import asyncio
+    from datetime import datetime, timezone
 
     async def main():
         agent = create_hr_screen_agent(debug=True)
         async for output in agent.astream(
             {
+                "start_time": datetime.now(timezone.utc),
                 "messages": [
                     {
                         "role": "user",
                         "content": "Hello, I am looking for a job in software development. Can you help me?",
                     }
-                ]
+                ],
             },
             stream_mode="updates",
             config={

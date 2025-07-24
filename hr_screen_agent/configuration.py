@@ -20,6 +20,14 @@ class Configuration(BaseModel):
         default="gemini-2.0-flash",
         description="The name of the language model to use for web search.",
     )
+    interview_duration_minutes: int = Field(
+        default=15,
+        description="The total duration of the interview in minutes.",
+    )
+    warning_threshold_minutes: int = Field(
+        default=5,
+        description="Number of minutes before end to show warning.",
+    )
 
     @classmethod
     def from_runnable_config(
