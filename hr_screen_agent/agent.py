@@ -1,7 +1,6 @@
 from typing import Optional
 
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import AIMessageChunk
 from langgraph.prebuilt.chat_agent_executor import create_react_agent
 from langgraph.pregel.protocol import PregelProtocol
 from langgraph.types import Checkpointer
@@ -70,7 +69,7 @@ if __name__ == "__main__":
 
     async def main():
         agent = create_hr_screen_agent(debug=False)
-        async for message_chunk, metadata in agent.astream(
+        async for output in agent.astream(
             {
                 "start_time": datetime.now(timezone.utc),
                 "messages": [
@@ -88,25 +87,17 @@ if __name__ == "__main__":
                     },
                 ],
             },
-            stream_mode="messages",
+            stream_mode="updates",
             config={
                 "callbacks": [],
                 "recursion_limit": 25,
                 "configurable": {"thread_id": "hr_screen_agent_thread"},
             },
         ):
-            content = ""
-            if isinstance(message_chunk, str):
-                content = message_chunk
-            elif isinstance(message_chunk, AIMessageChunk):
-                if message_chunk.tool_call_chunks or message_chunk.tool_calls:
-                    continue
-                content = message_chunk.text()
-            else:
+            updates = next(iter(output.values()))
+            if not updates:
                 continue
-            print("==========================================================")
-            print(metadata)
-            print(f"Message: {content}")
-            print("==========================================================")
+            last_message = updates["messages"][-1]
+            last_message.pretty_print()
 
     asyncio.run(main())

@@ -4,7 +4,6 @@ from typing import Any
 
 from langchain_core.messages import (
     AIMessage,
-    AIMessageChunk,
     HumanMessage,
     SystemMessage,
 )
@@ -77,12 +76,17 @@ class LangGraphStream(llm.LLMStream):
     async def _run(self) -> None:
         state = self._chat_ctx_to_state()
 
-        async for message_chunk, _ in self._graph.astream(
+        async for output in self._graph.astream(
             state,
             self._config,
-            stream_mode="messages",
+            stream_mode="updates",
         ):
-            chat_chunk = _to_chat_chunk(message_chunk)
+            updates = next(iter(output.values()))
+            if not updates:
+                continue
+            last_message = updates["messages"][-1]
+
+            chat_chunk = _to_chat_chunk(last_message)
             if chat_chunk:
                 self._event_ch.send_nowait(chat_chunk)
 
@@ -107,20 +111,15 @@ class LangGraphStream(llm.LLMStream):
         }
 
 
-def _to_chat_chunk(msg: str | Any) -> llm.ChatChunk | None:
+def _to_chat_chunk(msg: Any) -> llm.ChatChunk | None:
     message_id = utils.shortuuid("LC_")
-    content: str | None = None
 
-    if isinstance(msg, str):
-        content = msg
-    elif isinstance(msg, AIMessageChunk):
-        if msg.tool_call_chunks or msg.tool_calls:
-            # Ignore tool calls in the stream
-            return None
+    if not isinstance(msg, AIMessage):
+        return None
 
-        content = msg.text()
-        if msg.id:
-            message_id = msg.id
+    content = msg.text()
+    if msg.id:
+        message_id = msg.id
 
     if not content:
         return None
