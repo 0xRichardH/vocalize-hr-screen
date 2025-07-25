@@ -1,4 +1,5 @@
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.pregel.protocol import PregelProtocol
 from livekit import agents
 from livekit.agents import Agent, AgentSession, RoomInputOptions
 from livekit.plugins import (
@@ -10,6 +11,36 @@ from livekit.plugins import (
 )
 
 from hr_screen_agent import create_hr_screen_agent
+
+
+class AssistantAgent(Agent):
+    def __init__(self, agent: PregelProtocol, thread_id: str) -> None:
+        super().__init__(
+            instructions="",
+            llm=langchain.LLMAdapter(
+                graph=agent, config={"configurable": {"thread_id": thread_id}}
+            ),
+            # AssemblyAI's advanced turn detection
+            stt=assemblyai.STT(
+                end_of_turn_confidence_threshold=0.7,
+                min_end_of_turn_silence_when_confident=160,
+                max_turn_silence=2400,
+            ),
+            tts=cartesia.TTS(
+                model="sonic-2",
+                voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",  # Katie
+                language="en",
+                speed="normal",
+            ),
+            vad=silero.VAD.load(),  # Voice Activity Detection for interruptions
+            turn_detection="stt",  # Use AssemblyAI's STT-based turn detection
+            allow_interruptions=True,
+        )
+
+    async def on_enter(self):
+        self.session.generate_reply(
+            user_input="Hello",
+        )
 
 
 async def entrypoint(ctx: agents.JobContext):
@@ -29,47 +60,20 @@ async def entrypoint(ctx: agents.JobContext):
 
     agent = create_hr_screen_agent(checkpointer=checkpointer, debug=True)
 
-    # Create agent session with AssemblyAI's advanced turn detection
-    session = AgentSession(
-        stt=assemblyai.STT(
-            end_of_turn_confidence_threshold=0.7,
-            min_end_of_turn_silence_when_confident=160,
-            max_turn_silence=2400,
-        ),
-        tts=cartesia.TTS(
-            model="sonic-2",
-            voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",  # Katie
-            language="en",
-            speed="normal",
-        ),
-        vad=silero.VAD.load(),  # Voice Activity Detection for interruptions
-        turn_detection="stt",  # Use AssemblyAI's STT-based turn detection
-    )
+    session = AgentSession()
 
     thread_id = f"{ctx.room.name}__{await ctx.room.sid}"
 
     # Start the session - this will run until disconnected
     await session.start(
         room=ctx.room,
-        agent=Agent(
-            llm=langchain.LLMAdapter(
-                graph=agent, config={"configurable": {"thread_id": thread_id}}
-            ),
-            instructions="",
-        ),
+        agent=AssistantAgent(agent, thread_id),
         room_input_options=RoomInputOptions(
             audio_enabled=True,
             video_enabled=False,
             text_enabled=False,
             noise_cancellation=noise_cancellation.BVC(),
         ),
-    )
-
-    # Send initial greeting
-    await session.generate_reply(
-        user_input="Hello",
-        instructions="Greet the user and offer your assistance.",
-        allow_interruptions=True,
     )
 
 
