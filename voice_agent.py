@@ -27,8 +27,8 @@ class AssistantAgent(Agent):
                 max_turn_silence=2400,
             ),
             tts=cartesia.TTS(
-                model="sonic-2",
-                voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",  # Katie
+                # model="sonic-2",
+                # voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",  # Katie
                 language="en",
                 speed="normal",
             ),
@@ -41,6 +41,15 @@ class AssistantAgent(Agent):
         self.session.generate_reply(
             user_input="Hello",
         )
+
+    async def llm_node(self, chat_ctx, tools, model_settings=None):
+        async def process_stream():
+            async with self.llm.chat(chat_ctx=chat_ctx, tools=tools) as stream:  # type: ignore
+                async for chunk in stream:
+                    if chunk:
+                        yield chunk
+
+        return process_stream()
 
 
 async def entrypoint(ctx: agents.JobContext):
