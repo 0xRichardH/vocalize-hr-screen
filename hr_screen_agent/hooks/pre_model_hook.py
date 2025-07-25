@@ -18,7 +18,7 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> C
 
     # skip guardrails if the last message is not a user message
     if not isinstance(messages[-1], HumanMessage):
-        return Command(update={**state})
+        return Command(graph=None, goto="agent")
 
     configure = Configuration.from_runnable_config(config)
     llm = init_chat_model(configure.guardrail_model)
@@ -43,4 +43,4 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> C
             update={"messages": [AIMessage(content=relevance_result.reasoning)]},
         )
 
-    return Command(update={**state})
+    return Command(graph=None, goto="agent")

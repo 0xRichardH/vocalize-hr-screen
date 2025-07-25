@@ -5,4 +5,4 @@ uv *ARG:
   uv {{ARG}}
 
 dev:
-  uv run voice_agent.py dev
+  uv run app.py dev

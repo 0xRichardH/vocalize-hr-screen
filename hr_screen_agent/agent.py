@@ -1,8 +1,10 @@
+from typing import Optional
+
 from langchain.chat_models import init_chat_model
+from langchain_core.messages import AIMessageChunk
 from langgraph.prebuilt.chat_agent_executor import create_react_agent
 from langgraph.pregel.protocol import PregelProtocol
 from langgraph.types import Checkpointer
-from livekit.plugins.cartesia.tts import Optional
 
 from hr_screen_agent.configuration import Configuration
 from hr_screen_agent.hooks.pre_model_hook import pre_model_hook
@@ -67,25 +69,44 @@ if __name__ == "__main__":
     from datetime import datetime, timezone
 
     async def main():
-        agent = create_hr_screen_agent(debug=True)
-        async for output in agent.astream(
+        agent = create_hr_screen_agent(debug=False)
+        async for message_chunk, metadata in agent.astream(
             {
                 "start_time": datetime.now(timezone.utc),
                 "messages": [
                     {
+                        "role": "system",
+                        "content": "Greet the user and offer your assistance.",
+                    },
+                    {
                         "role": "user",
-                        "content": "Hello, I am looking for a job in software development. Can you help me?",
-                    }
+                        "content": "Hello",
+                    },
+                    {
+                        "role": "user",
+                        "content": "Hello",
+                    },
                 ],
             },
-            stream_mode="updates",
+            stream_mode="messages",
             config={
                 "callbacks": [],
                 "recursion_limit": 25,
                 "configurable": {"thread_id": "hr_screen_agent_thread"},
             },
         ):
-            last_message = next(iter(output.values()))["messages"][-1]  # type: ignore
-            last_message.pretty_print()
+            content = ""
+            if isinstance(message_chunk, str):
+                content = message_chunk
+            elif isinstance(message_chunk, AIMessageChunk):
+                if message_chunk.tool_call_chunks or message_chunk.tool_calls:
+                    continue
+                content = message_chunk.text()
+            else:
+                continue
+            print("==========================================================")
+            print(metadata)
+            print(f"Message: {content}")
+            print("==========================================================")
 
     asyncio.run(main())
