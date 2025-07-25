@@ -3,16 +3,17 @@ from livekit.agents import Agent
 from livekit.plugins import (
     assemblyai,
     cartesia,
-    langchain,
     silero,
 )
+
+from .llm_adapter import LLMAdapter
 
 
 class VoiceAgent(Agent):
     def __init__(self, agent: PregelProtocol, thread_id: str) -> None:
         super().__init__(
             instructions="",
-            llm=langchain.LLMAdapter(
+            llm=LLMAdapter(
                 graph=agent, config={"configurable": {"thread_id": thread_id}}
             ),
             # AssemblyAI's advanced turn detection
