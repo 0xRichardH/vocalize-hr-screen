@@ -12,6 +12,7 @@ from hr_screen_agent.state import HrScreenAgentState
 from hr_screen_agent.tools import (
     check_time_remaining,
     clear_thoughts,
+    end_call,
     get_interview_summary,
     list_input_files,
     read_input_file,
@@ -44,10 +45,11 @@ def create_hr_screen_agent(
             web_search,
             list_input_files,
             read_input_file,
-            write_interview_summary,
-            get_interview_summary,
             start_timer,
             check_time_remaining,
+            write_interview_summary,
+            get_interview_summary,
+            end_call,
         ],
         prompt=agent_instructions.format(
             current_time_context=current_time_context(),
@@ -76,10 +78,6 @@ if __name__ == "__main__":
                     {
                         "role": "system",
                         "content": "Greet the user and offer your assistance.",
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello",
                     },
                     {
                         "role": "user",
