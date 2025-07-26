@@ -15,7 +15,7 @@ An AI-powered voice screening agent for HR interviews using LiveKit, LangGraph, 
 1. Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone git@github.com:0xRichardH/vocalize-hr-screen.git
 cd vocalize-hr-screen
 ```
 
@@ -306,3 +306,7 @@ To add new capabilities:
 2. Register tools in `hr_screen_agent/tools/__init__.py`
 3. Add tool to agent creation in `hr_screen_agent/agent.py`
 4. Update prompts if needed in `hr_screen_agent/prompts.py`
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
