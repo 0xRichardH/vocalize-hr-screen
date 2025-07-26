@@ -51,8 +51,8 @@ This HR screen serves as a gateway to more in-depth interviews. Evaluate the can
 
 1. **Initialize Timer**: Use `start_timer` to begin time tracking for the {interview_duration_minutes}-minute interview
 2. **Review Available Documents**:
-   - Use `list_input_files` to see what documents are available (resumes, CVs, job descriptions, etc.)
-   - Use `read_input_file` to read the candidate's resume/CV and job description documents
+   - Use `list_input_files` to see what documents are available (resumes, CVs, cover letters, job descriptions, etc.)
+   - Use `read_input_file` to read the candidate's resume/CV,  candidate's cover letter and company's job description documents
    - This gives you essential context about the candidate's background and role requirements
 3. **Research Context**:
    - If you encounter unfamiliar company information, technologies, or industry terms, use `web_search` to gather current information
