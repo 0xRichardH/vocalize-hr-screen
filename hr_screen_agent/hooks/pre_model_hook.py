@@ -1,7 +1,8 @@
+import uuid
+
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import END
 from langgraph.types import Command
 
 from hr_screen_agent.configuration import Configuration
@@ -12,7 +13,10 @@ from hr_screen_agent.hooks.guardrail import (
 from hr_screen_agent.state import HrScreenAgentState
 
 
-async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> Command:
+async def pre_model_hook(
+    state: HrScreenAgentState,
+    config: RunnableConfig,
+) -> Command:
     state = state.copy()
     messages = state["messages"]
 
@@ -30,8 +34,12 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> C
     if not jailbreak_result.is_safe:
         return Command(
             graph=None,
-            goto=END,
-            update={"messages": [AIMessage(content=jailbreak_result.reasoning)]},
+            goto="agent",
+            update={
+                "messages": _generate_tool_call_messages(
+                    name="jailbreak guardrail_check", content=jailbreak_result.reasoning
+                )
+            },
         )
 
     # Check relevance guardrail
@@ -39,8 +47,23 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig) -> C
     if not relevance_result.is_relevant:
         return Command(
             graph=None,
-            goto=END,
-            update={"messages": [AIMessage(content=relevance_result.reasoning)]},
+            goto="agent",
+            update={
+                "messages": _generate_tool_call_messages(
+                    name="relevance guardrail_check", content=relevance_result.reasoning
+                )
+            },
         )
 
     return Command(graph=None, goto="agent")
+
+
+def _generate_tool_call_messages(name: str, content: str) -> list[BaseMessage]:
+    id = f"{name}__{uuid.uuid4()}"
+    return [
+        AIMessage(
+            content=name,
+            tool_calls=[{"name": name, "args": {}, "id": id}],
+        ),
+        ToolMessage(content=content, tool_call_id=id),
+    ]

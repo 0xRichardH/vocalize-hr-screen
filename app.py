@@ -1,3 +1,5 @@
+import logging
+
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from livekit import agents
 from livekit.agents import AgentSession, RoomInputOptions
@@ -7,6 +9,9 @@ from livekit.plugins import (
 
 from hr_screen_agent import create_hr_screen_agent
 from voice_agent import VoiceAgent
+
+logger = logging.getLogger("vocalize-hr-screen-agent")
+logger.setLevel(logging.INFO)
 
 
 async def entrypoint(ctx: agents.JobContext):
