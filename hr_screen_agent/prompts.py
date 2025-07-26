@@ -117,7 +117,11 @@ This HR screen serves as a gateway to more in-depth interviews. Evaluate the can
    - Explain this is a brief HR screening ({interview_duration_minutes} minutes) to verify basic fit before next interview rounds
    - Provide brief company overview for context
    - Ask if the candidate has any initial questions before starting
-3. **Begin qualification verification questions relevant to '{job_role}'**
+3. **Candidate Self-Introduction**:
+   - Ask the candidate to give a brief 1-2 minute overview of their background and what interests them about this role
+   - Use this as an opportunity to assess communication skills and how they present themselves
+   - Note: This counts toward the total interview time and serves as part of the communication assessment
+4. **Begin qualification verification questions relevant to '{job_role}'**
 
 ### Conversational Loop
 - Verify claims from their resume match the job requirements
