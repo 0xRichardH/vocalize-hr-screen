@@ -10,7 +10,27 @@ tags: devchallenge, assemblyaichallenge, ai, api
 
 **Vocalize HR Screen** is an intelligent voice-powered HR screening agent that conducts professional 15-minute interviews to evaluate candidates across four key areas: basic qualifications, motivation, logistical fit, and communication skills.
 
-This project addresses the **Business Automation** category by automating the time-consuming initial HR screening process while maintaining the human touch through natural voice conversations. The agent acts as "Rachel," a professional HR recruiter who can:
+### 💡 The Inspiration
+
+As someone who has experienced both sides of the hiring process, I noticed two critical pain points:
+
+**For Job Seekers**: Many talented candidates struggle with interview anxiety and lack access to realistic practice opportunities. They often get rejected at the screening stage not because they're unqualified, but because they couldn't effectively communicate their value in a high-pressure situation.
+
+**For Startups**: Small companies and startups often lack dedicated HR teams or the resources to conduct consistent, professional screening interviews. This leads to either skipped screening (resulting in wasted time on unqualified candidates) or inconsistent evaluation processes.
+
+### 🎯 The Vision
+
+Vocalize HR Screen solves both problems:
+
+- **📚 Mock Interview Platform**: Job seekers can practice realistic HR screening scenarios, receive detailed feedback, and build confidence before real interviews
+- **🏢 Startup HR Solution**: Small companies get access to professional-grade screening capabilities without hiring expensive HR personnel
+- **⚖️ Standardized Evaluation**: Ensures consistent, bias-free screening focused on qualifications rather than subjective impressions
+
+This democratizes professional HR processes, making quality screening accessible to everyone.
+
+### 🤖 Technical Implementation
+
+Built for the **Business Automation** category, this solution automates the time-consuming initial HR screening process while maintaining the human touch through natural voice conversations. The agent acts as "Rachel," a professional HR recruiter who can:
 
 - 🎯 Conduct structured, time-aware interviews
 - 📄 Automatically analyze candidate CVs and job descriptions
@@ -116,6 +136,63 @@ The system processes voice input through AssemblyAI's streaming API, enabling:
 - Seamless integration with LiveKit's real-time infrastructure
 
 ### Technical Architecture
+
+**System Architecture Overview:**
+
+```mermaid
+graph TB
+    subgraph "User Interface"
+        A["👤 Candidate<br/>Voice Input"] --> B["🎙️ AssemblyAI STT<br/>Speech Recognition"]
+        H["🔊 Cartesia TTS<br/>Text-to-Speech"] --> I["🗣️ Agent Voice<br/>Output"]
+    end
+    
+    subgraph "LiveKit Voice Processing"
+        B --> C["🎵 Voice Agent<br/>LiveKit Integration"]
+        C --> D["🔀 LLM Adapter<br/>Voice ↔ LangGraph Bridge"]
+        G --> H
+        D --> G["📝 Voice Response<br/>Generation"]
+    end
+    
+    subgraph "Core AI Agent"
+        D --> E["👩‍💼 HR Screen Agent<br/>LangGraph Executor"]
+        E --> F["🧠 Google Gemini<br/>LLM Reasoning"]
+        F --> E
+    end
+    
+    subgraph "Safety & Guardrails"
+        J["🛡️ Pre-Model Hook<br/>Request Processing"] --> K["🚫 Jailbreak Guard<br/>Security Check"]
+        J --> L["🎯 Relevance Guard<br/>Topic Validation"]
+        K --> M["✅ Safety Filter<br/>Approved Requests"]
+        L --> M
+    end
+    
+    subgraph "Agent Tools & Capabilities"
+        N["📄 Document Loader<br/>CV/Resume Analysis"] --> O["📊 Qualification<br/>Assessment"]
+        P["🌐 Web Search<br/>Company Research"] --> Q["🏢 Context<br/>Gathering"]
+        R["⏱️ Time Tracker<br/>Interview Management"] --> S["📅 Schedule<br/>Control"]
+        T["🤔 Think Tool<br/>Internal Reasoning"] --> U["💭 Decision<br/>Making"]
+        V["📝 Summary Tool<br/>Report Generation"] --> W["📋 Interview<br/>Evaluation"]
+    end
+    
+    subgraph "Data Storage"
+        X["📁 Input Folder<br/>CVs & Job Descriptions"] --> N
+        Y["💾 SQLite Database<br/>Conversation State"] --> Z["🔄 Session<br/>Persistence"]
+        AA["☁️ Google Gemini API<br/>LLM Services"] --> F
+    end
+    
+    D --> J
+    M --> E
+    E --> N
+    E --> P
+    E --> R
+    E --> T
+    E --> V
+    
+    style A fill:#e3f2fd
+    style I fill:#e8f5e8
+    style E fill:#fff3e0
+    style J fill:#fce4ec
+```
 
 **Voice-to-Intelligence Pipeline:**
 ```python

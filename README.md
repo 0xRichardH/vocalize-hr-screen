@@ -2,6 +2,18 @@
 
 An AI-powered voice screening agent for HR interviews using LiveKit, LangGraph, and Google Gemini. This system conducts automated 15-minute HR screening calls to evaluate candidates across basic qualifications, motivation, logistical fit, and communication skills.
 
+## 💡 The Story Behind This Project
+
+**The Problem**: Job seekers often struggle with interview anxiety and lack practice opportunities for screening calls, while startups and small companies can't afford dedicated HR teams for initial candidate screening.
+
+**The Solution**: Vocalize HR Screen bridges this gap by providing:
+
+- 🎯 **For Job Seekers**: A safe environment to practice mock interviews and receive structured feedback on their screening performance
+- 🚀 **For Startups**: An affordable, consistent screening solution that evaluates candidates professionally without requiring HR expertise
+- ⚖️ **For Everyone**: Standardized, bias-free initial screening that focuses on qualifications and fit rather than subjective impressions
+
+This project democratizes professional HR screening, making it accessible to both candidates who want to improve and companies that need efficient hiring processes.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
