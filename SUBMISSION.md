@@ -4,7 +4,7 @@ published: true
 tags: devchallenge, assemblyaichallenge, ai, api
 ---
 
-*This is a submission for the [AssemblyAI Voice Agents Challenge](https://dev.to/challenges/assemblyai-2025-07-16)*
+_This is a submission for the [AssemblyAI Voice Agents Challenge](https://dev.to/challenges/assemblyai-2025-07-16)_
 
 ## What I Built
 
@@ -46,20 +46,24 @@ The system combines cutting-edge voice AI with intelligent conversation manageme
 🔗 **GitHub Repository**: [https://github.com/0xRichardH/vocalize-hr-screen](https://github.com/0xRichardH/vocalize-hr-screen)
 
 ### Live Demo Video
-*[Add your demo video link here when available]*
+
+https://youtu.be/tmtbF_k2cPI
 
 ### Demo Flow Screenshots
 
 **Interview Setup & Document Analysis:**
+
 - Agent automatically reads candidate CV and job description
 - Initializes 15-minute timer for structured interview
 
 **Natural Voice Conversation:**
+
 - Professional introduction as "Rachel" from the company
 - Intelligent follow-up questions based on resume analysis
 - Real-time company research for contextual questions
 
 **Comprehensive Evaluation:**
+
 - Automated summary generation with detailed assessment
 - Structured recommendations for next interview rounds
 - Professional call termination with clear next steps
@@ -69,6 +73,7 @@ The system combines cutting-edge voice AI with intelligent conversation manageme
 {% github 0xRichardH/vocalize-hr-screen %}
 
 **Key Repository Highlights:**
+
 - 📁 Well-structured codebase with clear separation of concerns
 - 📚 Comprehensive documentation and setup instructions
 - 🔧 Easy configuration through environment variables
@@ -90,7 +95,7 @@ class VoiceAgent(Agent):
         super().__init__(
             instructions="",
             llm=LLMAdapter(
-                graph=agent, 
+                graph=agent,
                 config={"configurable": {"thread_id": thread_id}}
             ),
             # AssemblyAI's advanced turn detection
@@ -112,11 +117,13 @@ class VoiceAgent(Agent):
 ### Key AssemblyAI Features Leveraged
 
 **1. Intelligent Turn Detection**
+
 - `end_of_turn_confidence_threshold=0.7`: Ensures natural conversation flow
 - `min_end_of_turn_silence_when_confident=160ms`: Quick response times
 - `max_turn_silence=2400ms`: Handles thoughtful pauses during interviews
 
 **2. Professional Voice Processing**
+
 ```python
 # Advanced configuration for interview scenarios
 stt=assemblyai.STT(
@@ -131,6 +138,7 @@ stt=assemblyai.STT(
 
 **3. Real-time Streaming Architecture**
 The system processes voice input through AssemblyAI's streaming API, enabling:
+
 - Immediate response to candidate speech
 - Natural interruption handling during conversations
 - Seamless integration with LiveKit's real-time infrastructure
@@ -145,27 +153,27 @@ graph TB
         A["👤 Candidate<br/>Voice Input"] --> B["🎙️ AssemblyAI STT<br/>Speech Recognition"]
         H["🔊 Cartesia TTS<br/>Text-to-Speech"] --> I["🗣️ Agent Voice<br/>Output"]
     end
-    
+
     subgraph "LiveKit Voice Processing"
         B --> C["🎵 Voice Agent<br/>LiveKit Integration"]
         C --> D["🔀 LLM Adapter<br/>Voice ↔ LangGraph Bridge"]
         G --> H
         D --> G["📝 Voice Response<br/>Generation"]
     end
-    
+
     subgraph "Core AI Agent"
         D --> E["👩‍💼 HR Screen Agent<br/>LangGraph Executor"]
         E --> F["🧠 Google Gemini<br/>LLM Reasoning"]
         F --> E
     end
-    
+
     subgraph "Safety & Guardrails"
         J["🛡️ Pre-Model Hook<br/>Request Processing"] --> K["🚫 Jailbreak Guard<br/>Security Check"]
         J --> L["🎯 Relevance Guard<br/>Topic Validation"]
         K --> M["✅ Safety Filter<br/>Approved Requests"]
         L --> M
     end
-    
+
     subgraph "Agent Tools & Capabilities"
         N["📄 Document Loader<br/>CV/Resume Analysis"] --> O["📊 Qualification<br/>Assessment"]
         P["🌐 Web Search<br/>Company Research"] --> Q["🏢 Context<br/>Gathering"]
@@ -173,13 +181,13 @@ graph TB
         T["🤔 Think Tool<br/>Internal Reasoning"] --> U["💭 Decision<br/>Making"]
         V["📝 Summary Tool<br/>Report Generation"] --> W["📋 Interview<br/>Evaluation"]
     end
-    
+
     subgraph "Data Storage"
         X["📁 Input Folder<br/>CVs & Job Descriptions"] --> N
         Y["💾 SQLite Database<br/>Conversation State"] --> Z["🔄 Session<br/>Persistence"]
         AA["☁️ Google Gemini API<br/>LLM Services"] --> F
     end
-    
+
     D --> J
     M --> E
     E --> N
@@ -187,7 +195,7 @@ graph TB
     E --> R
     E --> T
     E --> V
-    
+
     style A fill:#e3f2fd
     style I fill:#e8f5e8
     style E fill:#fff3e0
@@ -195,12 +203,13 @@ graph TB
 ```
 
 **Voice-to-Intelligence Pipeline:**
+
 ```python
 # voice_agent/llm_adapter.py
 class LangGraphStream(llm.LLMStream):
     async def _run(self) -> None:
         state = self._chat_ctx_to_state()
-        
+
         # Stream through LangGraph for intelligent processing
         async for output in self._graph.astream(
             state, self._config, stream_mode="updates"
@@ -209,13 +218,14 @@ class LangGraphStream(llm.LLMStream):
             if not updates:
                 continue
             last_message = updates["messages"][-1]
-            
+
             chat_chunk = _to_chat_chunk(last_message)
             if chat_chunk:
                 self._event_ch.send_nowait(chat_chunk)
 ```
 
 **Intelligent Agent Integration:**
+
 ```python
 # hr_screen_agent/agent.py
 def create_hr_screen_agent(
@@ -240,11 +250,13 @@ def create_hr_screen_agent(
 ### Advanced Features
 
 **1. Context-Aware Processing**
+
 - Document analysis integration with voice responses
 - Real-time web search for company research
 - Persistent conversation state across interview sessions
 
 **2. Professional Safety Guardrails**
+
 ```python
 # hr_screen_agent/hooks/pre_model_hook.py
 async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig):
@@ -252,7 +264,7 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig):
     jailbreak_result = await jailbreak_guardrail(llm, last_messages)
     if not jailbreak_result.is_safe:
         return Command(goto="agent", update={"messages": safety_response})
-    
+
     # Relevance filtering for professional context
     relevance_result = await relevance_guardrail(llm, last_messages)
     if not relevance_result.is_relevant:
@@ -260,12 +272,13 @@ async def pre_model_hook(state: HrScreenAgentState, config: RunnableConfig):
 ```
 
 **3. Time-Aware Interview Management**
+
 ```python
 # Intelligent time tracking with AssemblyAI streaming
 async def check_time_remaining():
     elapsed = (datetime.now(timezone.utc) - state["start_time"]).total_seconds() / 60
     remaining = interview_duration - elapsed
-    
+
     if remaining <= warning_threshold:
         return f"⚠️ Warning: Only {remaining:.1f} minutes remaining"
 ```
@@ -284,4 +297,4 @@ This technical implementation showcases how AssemblyAI's cutting-edge voice tech
 
 ---
 
-*Built with 💙 using AssemblyAI, LiveKit, LangGraph, and Google Gemini* 
+_Built with 💙 using AssemblyAI, LiveKit, LangGraph, and Google Gemini_
